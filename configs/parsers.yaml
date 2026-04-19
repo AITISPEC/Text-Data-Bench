@@ -1,0 +1,34 @@
+parsers:
+  - handler: polars_parquet
+    extensions: [".parquet"]
+    kwargs: {}
+  - handler: polars_csv
+    extensions: [".csv"]
+    kwargs: { try_parse_dates: true }
+  - handler: polars_tsv
+    extensions: [".tsv"]
+    kwargs: { separator: "\t", try_parse_dates: true }
+  - handler: polars_ipc
+    extensions: [".feather", ".arrow"]
+    kwargs: {}
+  - handler: polars_excel
+    extensions: [".xlsx", ".xls"]
+    kwargs: {}
+  - handler: polars_json
+    extensions: [".json"]
+    kwargs: {}
+  - handler: polars_jsonl
+    extensions: [".jsonl", ".jsonlines"]
+    kwargs: {}
+  - handler: text_lines
+    extensions: [".txt", ".md"]
+    kwargs: { encoding: "utf-8", strip: true }
+  - handler: xml_simple
+    extensions: [".xml"]
+    kwargs: { tag_col: "xml_tag", content_col: "xml_text" }
+  - handler: pickle_safe
+    extensions: [".pkl", ".pickle"]
+    kwargs: { trusted_only: true }
+  - handler: llm_fallback
+    extensions: ["*"]
+    kwargs: {}

@@ -26,34 +26,42 @@
 # Подробный вывод + дополнительные флаги pip
 .\force-reinstall.ps1 -deps -verbose -extra "--upgrade-strategy eager"
 
-# Установка с поддержкой GPU (PyTorch + CUDA)
-pip install -e ".[gpu]"
+# Установка с поддержкой GPU для llama-cpp-python (требует CUDA Toolkit)
+.\force-reinstall.ps1 -gpu
 ```
 
 ### 🔧 Использование GGUF моделей для ускорения
 
 Проект поддерживает использование локальных GGUF-моделей через `llama-cpp-python`:
 
-1. Поместите модель в папку `models/`:
+1. **Установка с поддержкой GPU (опционально)**:
+   ```powershell
+   # Для CPU (по умолчанию)
+   pip install -e .
+
+   # Для NVIDIA GPU (требует CUDA Toolkit)
+   pip install -e ".[gpu]"
+   ```
+
+2. Поместите модель в папку `models/`:
    ```bash
    mkdir -p models
    # Скачайте модель, например:
    # wget https://huggingface.co/.../Qwen2-500M-Instruct-Q8_0.gguf -O models/Qwen2-500M-Instruct-Q8_0.gguf
    ```
 
-2. Настройте путь в `configs/pipeline.yaml`:
+3. Настройте путь в `configs/pipeline.yaml`:
    ```yaml
    pipeline:
      model_path: "./models/Qwen2-500M-Instruct-Q8_0.gguf"
      prefer_gpu: true  # Автоматически использует NVIDIA GPU или Apple MPS
-     llm_context: 512
+     llm_context: 4096
    ```
 
-3. Преимущества:
-   - **Без PyTorch**: Работает на CPU, не требует установки CUDA
-   - **GPU ускорение**: Автоматически использует NVIDIA GPU (CUDA) или Apple Silicon (Metal)
+4. Преимущества:
+   - **Без PyTorch**: Работает на CPU, не требует установки CUDA (при установке без флага `[gpu]`)
+   - **GPU ускорение**: Автоматически использует NVIDIA GPU (CUDA) или Apple Silicon (Metal) при установке с флагом `[gpu]`
    - **Квантование**: Поддержка Q4_K_M, Q8_0 и других форматов для экономии памяти
-```
 
 📖 Использование
 Запуск интерактивного меню:

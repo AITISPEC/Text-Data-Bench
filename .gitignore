@@ -1,45 +1,58 @@
 ```
-# Dependencies
-.venv/
-venv/
+# Python
 __pycache__/
 *.pyc
-.pytest_cache/
-.mypy_cache/
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.ENV
+.ENV.*
+.ipython/
+.jupyter/
 
-# Build/dist artifacts
-dist/
+# Distribution / packaging
+.Python
 build/
-target/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# Large model files
-models/*
-!models/.gitkeep
-
-# Output directory
-output/*
-
-# Environment files
-.env
-.env.local
-*.env.*
-
-# Logs
-*.log
-
-# Coverage reports
+# Testing
 .coverage
-coverage/
 htmlcov/
+.coverage.*
+.cache
+.pytest_cache/
+.hypothesis/
+.tox/
 
-# IDE files
+# IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
 *.tmp
 
-# System files
-.DS_Store
-Thumbs.db
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+.env.*
 ```

@@ -32,6 +32,8 @@ src/text_data_bench/processors/dedup.py
 src/text_data_bench/processors/filters.py
 src/text_data_bench/tests/__init__.py
 src/text_data_bench/utils/__init__.py
+src/text_data_bench/utils/cache.py
 src/text_data_bench/utils/logger.py
 src/text_data_bench/utils/magic_detector.py
 tests/test_pipeline.py
+tests/test_units.py

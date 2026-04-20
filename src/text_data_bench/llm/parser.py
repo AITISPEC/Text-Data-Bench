@@ -13,7 +13,7 @@ def parse_structured(text: str, model_path: str, ctx: int, prefer_gpu: bool) -> 
 		f"Raw text:\n{text[:6000]}\n\nJSON:"
 	)
 	for _ in range(2):
-		res = llm(prompt, max_tokens=1024, temperature=0.05, stop=["```", "\n\n"])
+		res = llm(prompt, max_tokens=4096, temperature=0.05, stop=["```", "\n\n"])
 		out = res["choices"][0]["text"].strip()
 		match = re.search(r"\[.*\]", out, re.DOTALL)
 		if match:

@@ -9,12 +9,12 @@ try:
 	console = Console()
 	_model_cache: Llama | None = None
 
-	def get_engine(model_path: str | None, ctx: int = 512, prefer_gpu: bool = True) -> Llama | None:
+	def get_engine(model_path: str | None, ctx: int = 4096, prefer_gpu: bool = True) -> Llama | None:
 		"""Load and cache GGUF model for LLM inference.
 		
 		Args:
 			model_path: Path to GGUF model file. If None or invalid, returns None.
-			ctx: Context window size (default: 512)
+			ctx: Context window size (default: 4096)
 			prefer_gpu: Whether to prefer GPU acceleration (default: True)
 		
 		Returns:
@@ -70,7 +70,7 @@ except ImportError:
 	logger = logging.getLogger(__name__)
 	console = Console()
 	
-	def get_engine(model_path: str | None, ctx: int = 512, prefer_gpu: bool = True):
+	def get_engine(model_path: str | None, ctx: int = 4096, prefer_gpu: bool = True):
 		"""Stub function when llama-cpp-python is not installed."""
 		console.print("[yellow]⚠ llama-cpp-python not installed. Install with: pip install llama-cpp-python[/yellow]")
 		logger.warning("get_engine called but llama-cpp-python is not installed")

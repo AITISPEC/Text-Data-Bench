@@ -13,7 +13,8 @@ console = Console()
 # --- Безопасная нормализация ---
 def _safe_to_flat_text(series: pl.Series):
 	"""Гарантированно превращает любой Polars-тип в плоский string"""
-	if series.dtype in (pl.String, pl.Utf8): return series
+	if series.dtype in (pl.String, pl.Utf8):
+		return series
 	try:
 		return pl.Series([
 			" ".join(str(item).strip() for item in row if item is not None)
@@ -83,7 +84,8 @@ def _load_xml(p: Path) -> pl.DataFrame:
 def _load_hdf5(p: Path) -> pl.DataFrame:
 	try:
 		import h5py
-	except ImportError: raise ImportError("[HDF5] Install h5py: pip install h5py")
+	except ImportError:
+		raise ImportError("[HDF5] Install h5py: pip install h5py")
 	with h5py.File(p, "r") as f:
 		for name, ds in f.items():
 			if hasattr(ds, "astype") and ds.dtype.kind in ("U", "S", "O"):

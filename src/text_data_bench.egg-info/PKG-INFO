@@ -15,4 +15,9 @@ Requires-Dist: openpyxl>=3.1.5
 Requires-Dist: h5py>=3.16.0
 Requires-Dist: datasets>=4.8.4
 Requires-Dist: xlsxwriter>=3.2.9
+Requires-Dist: pytest>=9.0.3
+Requires-Dist: llama-cpp-python>=0.2.0
+Provides-Extra: gpu
+Requires-Dist: torch>=2.0.0; extra == "gpu"
+Requires-Dist: torchvision>=0.15.0; extra == "gpu"
 Dynamic: license-file

@@ -15,7 +15,7 @@ dependencies = [
     "h5py>=3.16.0",
     "datasets>=4.8.4",
     "xlsxwriter>=3.2.9",
-    "pytest>=9.0.3"
+    "pytest>=9.0.3",
     "llama-cpp-python>=0.2.0"
 ]
 

@@ -12,6 +12,13 @@ dist/
 build/
 target/
 
+# Large model files
+models/*
+!models/.gitkeep
+
+# Output directory
+output/*
+
 # Environment files
 .env
 .env.local

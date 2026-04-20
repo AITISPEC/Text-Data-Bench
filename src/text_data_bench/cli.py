@@ -1,5 +1,6 @@
 # src/text_data_bench/cli.py
-import os, subprocess, sys
+import subprocess
+import sys
 from pathlib import Path
 import typer
 from rich.console import Console

@@ -16,7 +16,7 @@ OPTIONAL_DEPS = {
 }
 
 def _should_skip(filename: str) -> str | None:
-	base, ext = filename, Path(filename).suffix.lower()
+	ext = Path(filename).suffix.lower()
 	for key, pkg in OPTIONAL_DEPS.items():
 		if filename.startswith(key) or ext == key:
 			try:

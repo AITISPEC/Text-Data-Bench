@@ -1,5 +1,6 @@
 from pathlib import Path
-import polars as pl, yaml
+import polars as pl
+import yaml
 from rich.console import Console
 from text_data_bench.core.registry import PARSER_REGISTRY, register
 from text_data_bench.utils.magic_detector import detect_format
@@ -24,12 +25,13 @@ def _scan_json(p: Path, **_): return pl.read_json(p).lazy()
 @register("text_lines")
 def _load_text(p: Path, **kw):
 	raw = p.read_text(encoding="utf-8", errors="ignore")
-	lines = [l.strip() for l in raw.splitlines() if l.strip()]
+	lines = [line.strip() for line in raw.splitlines() if line.strip()]
 	return pl.DataFrame({"text": lines}).lazy()
 
 def _load_parser_cfg(path: str = "configs/parsers.yaml") -> list[dict]:
 	p = Path(path)
-	if not p.exists(): return []
+	if not p.exists():
+		return []
 	return yaml.safe_load(p.read_text(encoding="utf-8")).get("parsers", [])
 
 def auto_load(file_path: str) -> pl.DataFrame:

@@ -1,7 +1,10 @@
 # tests/generate_fixtures.py
 """Генератор синтетических фикстур с именами, соответствующими форматам"""
 import polars as pl
-import json, pickle, shutil, xml.etree.ElementTree as ET
+import json
+import pickle
+import shutil
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures"
@@ -64,9 +67,12 @@ def save_hf_dataset():
 if __name__ == "__main__":
 	# Безопасная очистка от предыдущих фикстур
 	for item in FIXTURE_DIR.iterdir():
-		if item.name.startswith(('.', '__')): continue
-		if item.is_dir(): shutil.rmtree(item)
-		else: item.unlink()
+		if item.name.startswith(('.', '__')):
+			continue
+		if item.is_dir():
+			shutil.rmtree(item)
+		else:
+			item.unlink()
 
 	generators = [
 		save_csv, save_tsv, save_parquet, save_feather, save_jsonl, save_json,

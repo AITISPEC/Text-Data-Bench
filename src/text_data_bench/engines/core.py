@@ -1,7 +1,9 @@
 # src/text_data_bench/engines/core.py
 """14 Explicit Format Engines + Deterministic Standardizer"""
 import polars as pl
-import json, pickle, xml.etree.ElementTree as ET
+import json
+import pickle
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Dict, Callable
 from rich.console import Console
@@ -9,7 +11,7 @@ from rich.console import Console
 console = Console()
 
 # --- Безопасная нормализация ---
-def _safe_to_flat_text(series: pl.Series) -> pl.Series:
+def _safe_to_flat_text(series: pl.Series):
 	"""Гарантированно превращает любой Polars-тип в плоский string"""
 	if series.dtype in (pl.String, pl.Utf8): return series
 	try:
@@ -30,7 +32,8 @@ def _standardize(df: pl.DataFrame, source_fmt: str) -> pl.DataFrame:
 		if df[col].dtype not in (pl.String, pl.Utf8, pl.List, pl.Struct, pl.Object):
 			continue
 		sample = df[col].drop_nulls().head(100)
-		if len(sample) == 0: continue
+		if len(sample) == 0:
+			continue
 		flat = _safe_to_flat_text(sample)
 		med_len = flat.str.len_chars().median()
 		if med_len and med_len > 10:
@@ -56,26 +59,30 @@ def _load_jsonl(p: Path) -> pl.DataFrame: return _standardize(pl.read_ndjson(p),
 
 def _load_json(p: Path) -> pl.DataFrame:
 	raw = json.loads(p.read_text(encoding="utf-8"))
-	if isinstance(raw, list): return _standardize(pl.DataFrame(raw), "JSON")
-	if isinstance(raw, dict): return _standardize(pl.DataFrame([raw]), "JSON")
+	if isinstance(raw, list):
+		return _standardize(pl.DataFrame(raw), "JSON")
+	if isinstance(raw, dict):
+		return _standardize(pl.DataFrame([raw]), "JSON")
 	raise ValueError("[JSON] Root must be list or dict.")
 
 def _load_txt(p: Path) -> pl.DataFrame:
-	lines = [l.strip() for l in p.read_text(encoding="utf-8", errors="ignore").splitlines() if l.strip()]
+	lines = [line.strip() for line in p.read_text(encoding="utf-8", errors="ignore").splitlines() if line.strip()]
 	return _standardize(pl.DataFrame({"text": lines}), "TXT")
 
 def _load_md(p: Path) -> pl.DataFrame:
-	lines = [l.strip() for l in p.read_text(encoding="utf-8", errors="ignore").splitlines() if l.strip()]
+	lines = [line.strip() for line in p.read_text(encoding="utf-8", errors="ignore").splitlines() if line.strip()]
 	return _standardize(pl.DataFrame({"content": lines}), "Markdown")
 
 def _load_xml(p: Path) -> pl.DataFrame:
 	tree = ET.parse(p)
 	records = [{"xml_tag": e.tag, "xml_text": (e.text or "").strip()} for e in tree.iter() if e.text and e.text.strip()]
-	if not records: raise ValueError("[XML] No extractable text nodes found.")
+	if not records:
+		raise ValueError("[XML] No extractable text nodes found.")
 	return _standardize(pl.DataFrame(records), "XML")
 
 def _load_hdf5(p: Path) -> pl.DataFrame:
-	try: import h5py
+	try:
+		import h5py
 	except ImportError: raise ImportError("[HDF5] Install h5py: pip install h5py")
 	with h5py.File(p, "r") as f:
 		for name, ds in f.items():
@@ -86,7 +93,8 @@ def _load_hdf5(p: Path) -> pl.DataFrame:
 def _load_arrow(p: Path) -> pl.DataFrame: return _standardize(pl.read_ipc(p), "Arrow")
 
 def _load_pickle(p: Path) -> pl.DataFrame:
-	with open(p, "rb") as f: obj = pickle.load(f)
+	with open(p, "rb") as f:
+		obj = pickle.load(f)
 	if isinstance(obj, list):
 		if obj and isinstance(obj[0], dict):
 			return _standardize(pl.DataFrame(obj), "Pickle")
@@ -96,8 +104,10 @@ def _load_pickle(p: Path) -> pl.DataFrame:
 	raise ValueError("[Pickle] Must contain dict, list, or tuple.")
 
 def _load_hf_dataset(p: Path) -> pl.DataFrame:
-	try: from datasets import load_from_disk
-	except ImportError: raise ImportError("[HF] Install datasets: pip install datasets")
+	try:
+		from datasets import load_from_disk
+	except ImportError:
+		raise ImportError("[HF] Install datasets: pip install datasets")
 	ds = load_from_disk(p)
 	# HF Datasets -> Polars
 	return _standardize(pl.from_pandas(ds.to_pandas()), "HF Dataset")

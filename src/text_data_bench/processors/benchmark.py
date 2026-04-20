@@ -1,9 +1,11 @@
 # src/text_data_bench/processors/benchmark.py
-import polars as pl, math
+import polars as pl
+import math
 from collections import Counter
 
 def compute_metrics(df: pl.DataFrame, text_col: str) -> dict:
-	if df.is_empty(): return {"rows": 0}
+	if df.is_empty():
+		return {"rows": 0}
 	txt = df[text_col]
 	lengths = txt.str.len_chars()
 	tokens = txt.str.split(" ").list.len()

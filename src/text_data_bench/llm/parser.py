@@ -1,4 +1,5 @@
-import json, re
+import json
+import re
 from rich.console import Console
 from .engine import get_engine
 
@@ -18,8 +19,10 @@ def parse_structured(text: str, model_path: str, ctx: int, prefer_gpu: bool) -> 
 		if match:
 			try:
 				data = json.loads(match.group(0))
-				if isinstance(data, list): return data
-			except json.JSONDecodeError: pass
+				if isinstance(data, list):
+					return data
+			except json.JSONDecodeError:
+				pass
 		prompt += "\nStrict JSON array only."
 	console.print("[yellow]⚠ LLM fallback failed. Returning empty list.[/yellow]")
 	return []

@@ -2,6 +2,7 @@
 param(
     [switch]$deps,      # Установить зависимости
     [switch]$verbose,   # Подробный вывод
+    [switch]$gpu,       # Установить с поддержкой GPU (llama-cpp-python с CUDA)
     [string]$extra=""   # Дополнительные флаги для pip
 )
 
@@ -34,7 +35,11 @@ Write-Host "[3/5] Installing fresh build..." -ForegroundColor Cyan
 # Формируем команду pip
 $pipCmd = "pip install -e . --no-cache-dir --force-reinstall"
 
-if (-not $deps) {
+if ($gpu) {
+    # Установка с поддержкой GPU через optional-dependencies
+    $pipCmd += "[gpu]"
+    Write-Host "  Mode: GPU support enabled (llama-cpp-python with CUDA)" -ForegroundColor Green
+} elseif (-not $deps) {
     $pipCmd += " --no-deps"
     Write-Host "  Mode: WITHOUT dependencies" -ForegroundColor Yellow
 } else {

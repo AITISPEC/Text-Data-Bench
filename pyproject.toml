@@ -1,6 +1,6 @@
 [project]
 name = "text-data-bench"
-version = "1.2.0"
+version = "1.0.0"
 description = "Data-centric pipeline with 14 explicit format engines"
 requires-python = ">=3.12"
 dependencies = [
@@ -15,14 +15,12 @@ dependencies = [
     "h5py>=3.16.0",
     "datasets>=4.8.4",
     "xlsxwriter>=3.2.9",
-    "pytest>=9.0.3",
-    "llama-cpp-python>=0.2.0"
+    "pytest>=9.0.3"
 ]
 
 [project.optional-dependencies]
 gpu = [
-    "torch>=2.0.0",
-    "torchvision>=0.15.0"
+    "llama-cpp-python>=0.2.9"
 ]
 
 [project.scripts]

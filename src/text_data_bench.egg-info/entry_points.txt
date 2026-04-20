@@ -1,0 +1,2 @@
+[console_scripts]
+databench = text_data_bench.cli:app

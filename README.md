@@ -25,6 +25,34 @@
 
 # Подробный вывод + дополнительные флаги pip
 .\force-reinstall.ps1 -deps -verbose -extra "--upgrade-strategy eager"
+
+# Установка с поддержкой GPU (PyTorch + CUDA)
+pip install -e ".[gpu]"
+```
+
+### 🔧 Использование GGUF моделей для ускорения
+
+Проект поддерживает использование локальных GGUF-моделей через `llama-cpp-python`:
+
+1. Поместите модель в папку `models/`:
+   ```bash
+   mkdir -p models
+   # Скачайте модель, например:
+   # wget https://huggingface.co/.../Qwen2-500M-Instruct-Q8_0.gguf -O models/Qwen2-500M-Instruct-Q8_0.gguf
+   ```
+
+2. Настройте путь в `configs/pipeline.yaml`:
+   ```yaml
+   pipeline:
+     model_path: "./models/Qwen2-500M-Instruct-Q8_0.gguf"
+     prefer_gpu: true  # Автоматически использует NVIDIA GPU или Apple MPS
+     llm_context: 512
+   ```
+
+3. Преимущества:
+   - **Без PyTorch**: Работает на CPU, не требует установки CUDA
+   - **GPU ускорение**: Автоматически использует NVIDIA GPU (CUDA) или Apple Silicon (Metal)
+   - **Квантование**: Поддержка Q4_K_M, Q8_0 и других форматов для экономии памяти
 ```
 
 📖 Использование

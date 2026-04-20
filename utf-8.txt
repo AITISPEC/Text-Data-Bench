@@ -1,0 +1,3 @@
+@'
+... вставьте сюда весь код force-reinstall.ps1 ...
+'@ | Set-Content -Path .\force-reinstall.ps1 -Encoding UTF8 -Force

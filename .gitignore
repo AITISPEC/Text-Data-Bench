@@ -14,6 +14,8 @@ venv/
 .jupyter/
 
 # Distribution / packaging
+models/*
+output/*
 .Python
 build/
 develop-eggs/

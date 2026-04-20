@@ -4,6 +4,8 @@ from typing import Optional
 class PipelineCfg(BaseModel):
 	prefer_gpu: bool = True
 	text_col: Optional[str] = None
+	model_path: Optional[str] = "./models/Qwen2-500M-Instruct-Q8_0.gguf"
+	llm_context: int = 512
 
 class FilterCfg(BaseModel):
 	min_length: int = 10

@@ -12,23 +12,40 @@ FIXTURES_DIR = Path(__file__).parent / "fixtures"
 OPTIONAL_DEPS = {
 	".xlsx": "openpyxl",
 	".h5": "h5py",
-	"sample_hf": "datasets",  # HF Dataset хранится как директория
+	".hf": "datasets",
 }
+
+# Форматы, которые не поддерживаются (пропускаем)
+SKIP_FORMATS = {
+	".rds": "RDS format not supported (R-specific)",
+	".npy": "NPY format - optional, requires numpy",
+	".npz": "NPZ format - optional, requires numpy",
+}
+
 
 def _should_skip(filename: str) -> str | None:
 	ext = Path(filename).suffix.lower()
+
+	# Пропускаем неподдерживаемые форматы
+	if ext in SKIP_FORMATS:
+		return SKIP_FORMATS[ext]
+
+	# Проверяем опциональные зависимости
 	for key, pkg in OPTIONAL_DEPS.items():
 		if filename.startswith(key) or ext == key:
 			try:
 				importlib.import_module(pkg)
 			except ImportError:
 				return f"{pkg} not installed"
+
 	return None
+
 
 TEST_FILES = [
 	f.name for f in FIXTURES_DIR.iterdir()
 	if (f.is_file() or f.is_dir()) and not f.name.startswith(('.', '__'))
 ]
+
 
 @pytest.mark.parametrize("filename", TEST_FILES)
 def test_pipeline_runs(filename, tmp_path):

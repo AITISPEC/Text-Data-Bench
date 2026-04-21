@@ -1,6 +1,0 @@
-text,label
-Hello world this is a test sentence one.,pos
-Polars is fast and efficient.,pos
-Data processing requires care.,neg
-Short text.,pos
-Another example with more words to test length filters properly.,neg

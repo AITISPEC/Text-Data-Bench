@@ -1,2 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<dataset><record>Hello world this is a test sentence one.</record><record>Polars is fast and efficient.</record><record>Data processing requires care.</record><record>Short text.</record><record>Another example with more words to test length filters properly.</record></dataset>

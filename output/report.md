@@ -1,6 +1,6 @@
 # 📊 TextDataBench Report
-**Generated:** 2026-04-20 03:18:40
-**Input:** `/workspace/tests/fixtures/md.md` → **Output:** `/tmp/pytest-of-root/pytest-2/test_pipeline_runs_md_md_0/out_md.parquet`
+**Generated:** 2026-04-21 17:45:57
+**Input:** `/workspace/tests/fixtures/parquet.parquet` → **Output:** `/tmp/tmp0209yl4s/out_parquet.parquet.parquet`
 **Steps Completed:** 3/4
 
 ---

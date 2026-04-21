@@ -29,6 +29,3 @@ parsers:
   - handler: pickle_safe
     extensions: [".pkl", ".pickle"]
     kwargs: { trusted_only: true }
-  - handler: llm_fallback
-    extensions: ["*"]
-    kwargs: {}

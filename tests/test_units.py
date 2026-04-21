@@ -13,7 +13,6 @@ from text_data_bench.utils.cache import (  # noqa: E402
 from text_data_bench.processors.filters import apply_filters  # noqa: E402
 from text_data_bench.processors.dedup import deduplicate  # noqa: E402
 from text_data_bench.processors.balancer import balance  # noqa: E402
-from text_data_bench.llm.engine import get_engine  # noqa: E402
 
 
 # tests/test_cache.py
@@ -201,28 +200,3 @@ class TestBalancer:
         result1 = balance(df, strategy="uniform", group_col=None, seed=123)
         result2 = balance(df, strategy="uniform", group_col=None, seed=123)
         assert list(result1["text"]) == list(result2["text"])
-
-
-# tests/test_llm_engine.py
-"""Unit tests for LLM engine module."""
-
-
-class TestLLMEngine:
-    """Tests for LLM engine."""
-
-    def test_get_engine_no_model_path(self):
-        """Test get_engine with None model path returns None."""
-        result = get_engine(None, ctx=4096, prefer_gpu=False)
-        assert result is None
-
-    def test_get_engine_invalid_path(self):
-        """Test get_engine with invalid path returns None."""
-        result = get_engine("/nonexistent/path/model.gguf", ctx=4096, prefer_gpu=False)
-        assert result is None
-
-    def test_get_engine_default_ctx(self):
-        """Test that default context window is 4096."""
-        # This test verifies the default parameter value
-        # Actual loading requires a valid model file
-        result = get_engine(None)  # Uses default ctx=4096
-        assert result is None

@@ -1,48 +1,48 @@
+```
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+coverage/
+
+# Environment
+.env
+.env.local
+.env.*
+.venv/
 venv/
 ENV/
-build/
-dist/
-*.egg-info/
-*.egg
-.eggs/
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
-
-# Project specific
-output/
-models/*.gguf
-*.parquet
-*.h5
-*.arrow
-.pytest_cache/
-.coverage
-htmlcov/
-.tox/
-.mypy_cache/
-.ruff_cache/
+*.tmp
 
 # OS
 .DS_Store
 Thumbs.db
-desktop.ini
-
-# Logs
-*.log
-logs/
-
-# Temporary files
-*.tmp
-*.bak
-*.orig
+```

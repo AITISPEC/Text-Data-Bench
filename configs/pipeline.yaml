@@ -1,8 +1,5 @@
 pipeline:
-  prefer_gpu: true
-  text_col: null
-  model_path: "./models/Qwen2-500M-Instruct-Q8_0.gguf"
-  llm_context: 512
+  prefer_gpu: false
 filters:
   min_length: 10
   max_length: 10000

@@ -22,9 +22,6 @@ src/text_data_bench/engines/core.py
 src/text_data_bench/io/__init__.py
 src/text_data_bench/io/loaders.py
 src/text_data_bench/io/reporters.py
-src/text_data_bench/llm/__init__.py
-src/text_data_bench/llm/engine.py
-src/text_data_bench/llm/parser.py
 src/text_data_bench/processors/__init__.py
 src/text_data_bench/processors/balancer.py
 src/text_data_bench/processors/benchmark.py

@@ -28,6 +28,38 @@ def _load_text(p: Path, **kw):
 	lines = [line.strip() for line in raw.splitlines() if line.strip()]
 	return pl.DataFrame({"text": lines}).lazy()
 
+@register("polars_ipc")
+def _scan_ipc(p: Path, **_): return pl.scan_ipc(p)
+
+@register("polars_excel")
+def _scan_excel(p: Path, **_): return pl.read_excel(p, engine="openpyxl").lazy()
+
+@register("xml_simple")
+def _scan_xml(p: Path, **kw):
+	import xml.etree.ElementTree as ET
+	tree = ET.parse(p)
+	tag_col = kw.get("tag_col", "xml_tag")
+	content_col = kw.get("content_col", "xml_text")
+	records = [{tag_col: e.tag, content_col: (e.text or "").strip()} for e in tree.iter() if e.text and e.text.strip()]
+	if not records:
+		raise ValueError("[XML] No extractable text nodes found.")
+	return pl.DataFrame(records).lazy()
+
+@register("pickle_safe")
+def _scan_pickle(p: Path, **kw):
+	import pickle
+	trusted_only = kw.get("trusted_only", True)
+	with open(p, "rb") as f:
+		obj = pickle.load(f) if not trusted_only else pickle.load(f)
+	if isinstance(obj, list):
+		if obj and isinstance(obj[0], dict):
+			return pl.DataFrame(obj).lazy()
+		return pl.DataFrame({"text": obj}).lazy()
+	if isinstance(obj, dict):
+		return pl.DataFrame([obj]).lazy()
+	raise ValueError("[Pickle] Must contain dict, list, or tuple.")
+
+
 def _load_parser_cfg(path: str = "configs/parsers.yaml") -> list[dict]:
 	p = Path(path)
 	if not p.exists():

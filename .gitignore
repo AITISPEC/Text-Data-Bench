@@ -11,6 +11,10 @@ __pycache__/
 .env.local
 *.env.*
 
+# Output and Input
+output/*
+tests/fixtures/*
+
 # Coverage reports
 .coverage
 coverage/

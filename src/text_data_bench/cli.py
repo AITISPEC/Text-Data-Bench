@@ -28,11 +28,10 @@ def menu():
 	while True:
 		console.print("\n[1] Test (pytest)")
 		console.print("[2] Bench (run pipeline)")
-		console.print("[3] Force Reinstall")
 		console.print("[0] Exit")
 
 		try:
-			choice = Prompt.ask("\nSelect option", choices=["0", "1", "2", "3"], default="0")
+			choice = Prompt.ask("\nSelect option", choices=["0", "1", "2"], default="0")
 
 			if choice == "0":
 				console.print("\n[yellow]👋 Exiting...[/yellow]")
@@ -79,18 +78,6 @@ def menu():
 					cfg.output.report_path = str(out_dir / f"{input_file.name}.md")
 					console.print(f"\n[cyan]⚙️  Processing: {input_file.name} → output/{input_file.name}[/cyan]")
 					run(str(input_file), str(out_dir / input_file.name), cfg)
-
-			elif choice == "3":
-				console.print("[blue]🔄 Force reinstalling...[/blue]")
-				script = Path(__file__).resolve().parents[2] / "force-reinstall.ps1"
-				if script.exists():
-					res = subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-File", str(script)])
-					if res.returncode == 0:
-						console.print("[green]✅ Reinstall successful. Restart CLI to apply changes.[/green]")
-					else:
-						console.print("[red]❌ Reinstall failed.[/red]")
-				else:
-					console.print("[red]❌ force-reinstall.ps1 not found in project root.[/red]")
 
 		except KeyboardInterrupt:
 			console.print("\n[yellow]⏹ Interrupted. Exiting...[/yellow]")

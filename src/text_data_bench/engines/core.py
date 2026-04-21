@@ -30,19 +30,20 @@ def _standardize(df: pl.DataFrame, source_fmt: str) -> pl.DataFrame:
 	candidates = []
 	priority_names = {"text", "content", "utterance", "prompt", "response", "body", "description", "comment"}
 	for col in df.columns:
-		if df[col].dtype not in (pl.String, pl.Utf8, pl.List, pl.Struct, pl.Object):
+		# Разрешаем строки, списки, структуры И числовые типы (для табличных данных типа Iris)
+		if df[col].dtype not in (pl.String, pl.Utf8, pl.List, pl.Struct, pl.Object, pl.Float32, pl.Float64, pl.Int32, pl.Int64, pl.UInt32, pl.UInt64):
 			continue
 		sample = df[col].drop_nulls().head(100)
 		if len(sample) == 0:
 			continue
 		flat = _safe_to_flat_text(sample)
 		med_len = flat.str.len_chars().median()
-		if med_len and med_len > 10:
+		if med_len and med_len > 0:  # Числа тоже подходят, если они есть
 			score = 1000 if col.lower() in priority_names else med_len
 			candidates.append((col, score))
 
 	if not candidates:
-		raise ValueError(f"[{source_fmt}] No string/list columns found. Cannot extract _tdb_text.")
+		raise ValueError(f"[{source_fmt}] No suitable columns found (string, list, or numeric). Cannot extract _tdb_text.")
 
 	best_col = max(candidates, key=lambda x: x[1])[0]
 	console.print(f"[blue]🔍 Extracting '{best_col}' → _tdb_text[/blue]")
@@ -54,7 +55,18 @@ def _standardize(df: pl.DataFrame, source_fmt: str) -> pl.DataFrame:
 def _load_csv(p: Path) -> pl.DataFrame: return _standardize(pl.read_csv(p), "CSV")
 def _load_tsv(p: Path) -> pl.DataFrame: return _standardize(pl.read_csv(p, separator="\t"), "TSV")
 def _load_parquet(p: Path) -> pl.DataFrame: return _standardize(pl.read_parquet(p), "Parquet")
-def _load_feather(p: Path) -> pl.DataFrame: return _standardize(pl.read_ipc(p), "Feather")
+def _load_feather(p: Path) -> pl.DataFrame:
+	# Feather v1/v2: пробуем read_ipc с явным указанием формата, если ошибка - пробуем как Arrow IPC
+	try:
+		return _standardize(pl.read_ipc(p), "Feather")
+	except pl.exceptions.ComputeError:
+		# Возможно это старый формат Feather, пробуем через pyarrow
+		try:
+			import pyarrow.feather as pf
+			table = pf.read_table(p)
+			return _standardize(pl.from_arrow(table), "Feather")
+		except Exception:
+			raise
 def _load_excel(p: Path) -> pl.DataFrame: return _standardize(pl.read_excel(p, engine="openpyxl"), "Excel")
 def _load_jsonl(p: Path) -> pl.DataFrame: return _standardize(pl.read_ndjson(p), "JSONL")
 
@@ -87,12 +99,29 @@ def _load_hdf5(p: Path) -> pl.DataFrame:
 	except ImportError:
 		raise ImportError("[HDF5] Install h5py: pip install h5py")
 	with h5py.File(p, "r") as f:
+		# Ищем датасеты с строковыми данными или числовыми (для табличных данных)
 		for name, ds in f.items():
-			if hasattr(ds, "astype") and ds.dtype.kind in ("U", "S", "O"):
-				return _standardize(pl.DataFrame({"text": ds[:].astype(str)}), "HDF5")
-	raise ValueError("[HDF5] No string datasets found.")
+			if hasattr(ds, "astype"):
+				if ds.dtype.kind in ("U", "S", "O"):  # строки
+					return _standardize(pl.DataFrame({"text": ds[:].astype(str)}), "HDF5")
+				elif ds.dtype.kind in ("i", "f"):  # числовые данные
+					# Преобразуем в DataFrame с колонками
+					data = {col: ds[:, i] if len(ds.shape) > 1 else ds[:] for i, col in enumerate([f"col_{i}" for i in range(ds.shape[-1])])} if len(ds.shape) > 1 else {"col_0": ds[:]}
+					return _standardize(pl.DataFrame(data), "HDF5")
+	raise ValueError("[HDF5] No suitable datasets found.")
 
-def _load_arrow(p: Path) -> pl.DataFrame: return _standardize(pl.read_ipc(p), "Arrow")
+def _load_arrow(p: Path) -> pl.DataFrame:
+	# Arrow IPC format: пробуем read_ipc, если ошибка - пробуем через pyarrow
+	try:
+		return _standardize(pl.read_ipc(p), "Arrow")
+	except pl.exceptions.ComputeError:
+		try:
+			import pyarrow.ipc as ipc
+			with ipc.open_file(p) as f:
+				table = f.read_all()
+			return _standardize(pl.from_arrow(table), "Arrow")
+		except Exception:
+			raise
 
 def _load_pickle(p: Path) -> pl.DataFrame:
 	with open(p, "rb") as f:

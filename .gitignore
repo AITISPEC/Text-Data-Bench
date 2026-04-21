@@ -3,19 +3,15 @@
 *.pyc
 __pycache__/
 
-# Logs
-*.log
-
-# Environment files
+# Virtual environments
+venv/
+.venv/
 .env
 .env.local
 *.env.*
 
-# Output and Input
-output/*
-!output/.gitkeep
-tests/fixtures/*
-!tests/fixtures/.gitkeep
+# Logs
+*.log
 
 # Coverage reports
 .coverage
@@ -34,7 +30,11 @@ dist/
 build/
 *.egg-info/
 
-# Python virtual environments
-venv/
-.venv/
+# Testing
+.pytest_cache/
+.mypy_cache/
+
+# OS generated files
+.DS_Store
+Thumbs.db
 ```

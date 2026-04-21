@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 
 def setup_logger(name: str = "text_data_bench", level: str = "INFO", json_format: bool = False) -> logging.Logger:
     logger = logging.getLogger(name)

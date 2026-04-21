@@ -11,7 +11,6 @@ from text_data_bench.processors.balancer import balance
 from text_data_bench.io.reporters import generate_report
 from text_data_bench.utils.logger import setup_logger
 import polars as pl
-import logging
 
 console = Console()
 logger = setup_logger()

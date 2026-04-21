@@ -13,7 +13,9 @@ __pycache__/
 
 # Output and Input
 output/*
+!output/.gitkeep
 tests/fixtures/*
+!tests/fixtures/.gitkeep
 
 # Coverage reports
 .coverage

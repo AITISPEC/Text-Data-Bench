@@ -4,4 +4,6 @@
 
 # Output and Input
 output/*
+!output/.gitkeep
 tests/fixtures/*
+!tests/fixtures/.gitkeep

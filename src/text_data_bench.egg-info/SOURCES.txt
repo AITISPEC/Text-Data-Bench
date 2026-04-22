@@ -18,7 +18,13 @@ src/text_data_bench/core/device.py
 src/text_data_bench/core/pipeline.py
 src/text_data_bench/core/registry.py
 src/text_data_bench/engines/__init__.py
+src/text_data_bench/engines/base.py
 src/text_data_bench/engines/core.py
+src/text_data_bench/engines/graph.py
+src/text_data_bench/engines/numpy.py
+src/text_data_bench/engines/specialized.py
+src/text_data_bench/engines/tabular.py
+src/text_data_bench/engines/textual.py
 src/text_data_bench/io/__init__.py
 src/text_data_bench/io/loaders.py
 src/text_data_bench/io/reporters.py

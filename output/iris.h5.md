@@ -1,6 +1,6 @@
 # 📊 TextDataBench Report
 **Generated:** 2026-04-22 15:25:53
-**Input:** `C:\Users\AITISPEC\miniconda3\envs\TextDataBench\py\tests\fixtures\iris.csv` → **Output:** `C:\Users\AITISPEC\miniconda3\envs\TextDataBench\py\output\iris.csv`
+**Input:** `C:\Users\AITISPEC\miniconda3\envs\TextDataBench\py\tests\fixtures\iris.h5` → **Output:** `C:\Users\AITISPEC\miniconda3\envs\TextDataBench\py\output\iris.h5`
 **Steps Completed:** 3/4
 
 ---
@@ -8,12 +8,12 @@
 ## 📈 Pipeline Summary
 | Metric                     |     Value |
 |:---------------------------|----------:|
-| Rows Processed             | 1 |
-| Dedup Removed              | 149 |
-| Avg Length (chars)         | 10.00 |
+| Rows Processed             | 4 |
+| Dedup Removed              | 2 |
+| Avg Length (chars)         | 11.50 |
 | Avg Tokens                 | 1.00 |
 | TTR (Lexical Diversity)    | 1.00 |
-| Shannon Entropy            | 2.92 |
+| Shannon Entropy            | 3.56 |
 | Empty Ratio                | 0.0000 |
 
 ---
@@ -21,12 +21,12 @@
 ## 🔄 Metric Delta (Before → After)
 | Metric               |     Before |      After |   Change |
 |:---------------------|-----------:|-----------:|---------:|
-| Rows                 |          150 |            1 |      ↓ 149 |
-| Avg Chars            |         8.30 |        10.00 |     ↑ 1.70 |
-| Max Chars            |           10 |           10 |        • 0 |
+| Rows                 |            6 |            4 |        ↓ 2 |
+| Avg Chars            |         9.20 |        11.50 |     ↑ 2.30 |
+| Max Chars            |           12 |           12 |        • 0 |
 | Avg Tokens           |         1.00 |         1.00 |          ≈ |
-| TTR                  |         0.02 |         1.00 |     ↑ 0.98 |
-| Entropy              |         3.43 |         2.92 |     ↓ 0.51 |
+| TTR                  |         1.00 |         1.00 |          ≈ |
+| Entropy              |         3.65 |         3.56 |     ↓ 0.09 |
 | Empty %              |       0.0000 |       0.0000 |          ≈ |
 
 ---

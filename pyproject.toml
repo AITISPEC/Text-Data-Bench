@@ -4,8 +4,8 @@ version = "1.0.0"
 description = "Data-centric pipeline with 14 explicit format engines"
 requires-python = ">=3.12"
 dependencies = [
-    "polars>=1.39.3",
-    "pydantic>=2.13.2",
+    "polars>=1.40.0",
+    "pydantic>=2.13.3",
     "typer>=0.24.1",
     "rich>=15.0.0",
     "datasketch>=1.10.0",
@@ -16,13 +16,16 @@ dependencies = [
     "datasets>=4.8.4",
     "xlsxwriter>=3.2.9",
     "pytest>=9.0.3",
-    "numpy>=1.24.0",
-    "pyarrow>=14.0.0"
+    "numpy>=2.4.0",
+    "pyarrow>=18.0.0",
+    "pydot>=3.9.0",
+    "pyreadr>=0.5.1"
 ]
 
 [project.optional-dependencies]
-cpu = []
-gpu = []
+gpu = [
+    "polars[gpu]"
+]
 
 [project.scripts]
 databench = "text_data_bench.cli:app"

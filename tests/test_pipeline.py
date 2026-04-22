@@ -8,20 +8,6 @@ import polars as pl
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
-# Опциональные зависимости для пропуска тестов, если пакет не установлен
-OPTIONAL_DEPS = {
-	".xlsx": "openpyxl",
-	".h5": "h5py",
-	".hf": "datasets",
-}
-
-# Форматы, которые не поддерживаются (пропускаем)
-SKIP_FORMATS = {
-	".rds": "RDS format not supported (R-specific)",
-	".npy": "NPY format - optional, requires numpy",
-	".npz": "NPZ format - optional, requires numpy",
-}
-
 
 def _should_skip(filename: str) -> str | None:
 	ext = Path(filename).suffix.lower()
@@ -32,7 +18,7 @@ def _should_skip(filename: str) -> str | None:
 
 	# Проверяем опциональные зависимости
 	for key, pkg in OPTIONAL_DEPS.items():
-		if filename.startswith(key) or ext == key:
+		if ext == key:
 			try:
 				importlib.import_module(pkg)
 			except ImportError:

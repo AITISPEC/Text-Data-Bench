@@ -1,5 +1,5 @@
 # src/text_data_bench/engines/core.py
-"""14+ Explicit Format Engines + Deterministic Standardizer"""
+"""17+ Explicit Format Engines + Deterministic Standardizer"""
 import polars as pl
 import json
 import pickle
@@ -36,7 +36,7 @@ def _standardize(df: pl.DataFrame, source_fmt: str) -> pl.DataFrame:
 	priority_names = {"text", "content", "utterance", "prompt", "response", "body", "description", "comment"}
 
 	for col in df.columns:
-		# Разрешаем строки, списки, структуры И числовые типы (для табличных данных типа Iris)
+		# Разрешаем строки, списки, структуры и числовые типы
 		if df[col].dtype not in (pl.String, pl.Utf8, pl.List, pl.Struct, pl.Object,
 								  pl.Float32, pl.Float64, pl.Int32, pl.Int64, pl.UInt32, pl.UInt64):
 			continue
@@ -45,12 +45,12 @@ def _standardize(df: pl.DataFrame, source_fmt: str) -> pl.DataFrame:
 			continue
 		flat = _safe_to_flat_text(sample)
 		med_len = flat.str.len_chars().median()
-		if med_len and med_len > 0:  # Числа тоже подходят, если они есть
+		if med_len and med_len > 0:
 			score = 1000 if col.lower() in priority_names else med_len
 			candidates.append((col, score))
 
 	if not candidates:
-		raise ValueError(f"[{source_fmt}] No suitable columns found (string, list, or numeric). Cannot extract _tdb_text.")
+		raise ValueError(f"[{source_fmt}] No suitable columns found. Cannot extract _tdb_text.")
 
 	best_col = max(candidates, key=lambda x: x[1])[0]
 	console.print(f"[blue]🔍 Extracting '{best_col}' → _tdb_text[/blue]")
@@ -59,7 +59,8 @@ def _standardize(df: pl.DataFrame, source_fmt: str) -> pl.DataFrame:
 	return df
 
 
-# --- Движки для форматов ---
+# ==================== 1. ТАБЛИЧНЫЕ ФОРМАТЫ ====================
+
 def _load_csv(p: Path) -> pl.DataFrame:
 	return _standardize(pl.read_csv(p), "CSV")
 
@@ -73,11 +74,9 @@ def _load_parquet(p: Path) -> pl.DataFrame:
 
 
 def _load_feather(p: Path) -> pl.DataFrame:
-	# Feather v1/v2: пробуем read_ipc с явным указанием формата, если ошибка - пробуем как Arrow IPC
 	try:
 		return _standardize(pl.read_ipc(p), "Feather")
 	except pl.exceptions.ComputeError:
-		# Возможно это старый формат Feather, пробуем через pyarrow
 		try:
 			import pyarrow.feather as pf
 			table = pf.read_table(p)
@@ -103,6 +102,8 @@ def _load_json(p: Path) -> pl.DataFrame:
 	raise ValueError("[JSON] Root must be list or dict.")
 
 
+# ==================== 2. ТЕКСТОВЫЕ ФОРМАТЫ ====================
+
 def _load_txt(p: Path) -> pl.DataFrame:
 	lines = [line.strip() for line in p.read_text(encoding="utf-8", errors="ignore").splitlines() if line.strip()]
 	if not lines:
@@ -125,6 +126,70 @@ def _load_xml(p: Path) -> pl.DataFrame:
 	return _standardize(pl.DataFrame(records), "XML")
 
 
+# ==================== 3. ГРАФОВЫЕ ФОРМАТЫ ====================
+
+def _load_gml(p: Path) -> pl.DataFrame:
+	"""GML graph format -> edgelist"""
+	try:
+		import networkx as nx
+	except ImportError:
+		raise ImportError("[GML] Install networkx: pip install networkx")
+
+	G = nx.read_gml(p)
+	edges = list(G.edges())
+	if edges:
+		df = pl.DataFrame({"source": [str(e[0]) for e in edges], "target": [str(e[1]) for e in edges]})
+	else:
+		df = pl.DataFrame({"source": [], "target": []})
+	return _standardize(df, "GML")
+
+
+def _load_graphml(p: Path) -> pl.DataFrame:
+	try:
+		import networkx as nx
+	except ImportError:
+		raise ImportError("[GraphML] Install networkx: pip install networkx")
+
+	G = nx.read_graphml(p)
+	edges = list(G.edges())
+	if edges:
+		df = pl.DataFrame({"source": [str(e[0]) for e in edges], "target": [str(e[1]) for e in edges]})
+	else:
+		df = pl.DataFrame({"source": [], "target": []})
+	return _standardize(df, "GraphML")
+
+
+def _load_dot(p: Path) -> pl.DataFrame:
+	try:
+		import networkx as nx
+	except ImportError:
+		raise ImportError("[DOT] Install networkx: pip install networkx")
+
+	# Пробуем pydot (легче устанавливается)
+	try:
+		G = nx.drawing.nx_pydot.read_dot(p)
+	except ImportError:
+		# Пробуем pygraphviz
+		try:
+			G = nx.nx_agraph.read_dot(p)
+		except ImportError:
+			raise ImportError("[DOT] Install pydot (pip install pydot) or pygraphviz")
+
+	edges = list(G.edges())
+	if edges:
+		df = pl.DataFrame({"source": [str(e[0]) for e in edges], "target": [str(e[1]) for e in edges]})
+	else:
+		# Если нет рёбер, пробуем извлечь узлы
+		nodes = list(G.nodes())
+		if nodes:
+			df = pl.DataFrame({"node": [str(n) for n in nodes]})
+		else:
+			df = pl.DataFrame({"source": [], "target": []})
+	return _standardize(df, "DOT")
+
+
+# ==================== 4. СПЕЦИАЛИЗИРОВАННЫЕ ФОРМАТЫ ====================
+
 def _load_hdf5(p: Path) -> pl.DataFrame:
 	try:
 		import h5py
@@ -132,7 +197,6 @@ def _load_hdf5(p: Path) -> pl.DataFrame:
 		raise ImportError("[HDF5] Install h5py: pip install h5py")
 
 	with h5py.File(p, "r") as f:
-		# Собираем все датасеты
 		datasets = []
 		def _collect_datasets(name, obj):
 			if isinstance(obj, h5py.Dataset):
@@ -141,16 +205,15 @@ def _load_hdf5(p: Path) -> pl.DataFrame:
 
 		for name, ds in datasets:
 			try:
-				if ds.dtype.kind in ("U", "S", "O"):  # строки
+				if ds.dtype.kind in ("U", "S", "O"):
 					data = ds[:].astype(str)
 					df = pl.DataFrame({"text": data})
 					return _standardize(df, f"HDF5({name})")
-				elif ds.dtype.kind in ("i", "f"):  # числа
+				elif ds.dtype.kind in ("i", "f"):
 					arr = ds[:]
 					if arr.ndim == 1:
 						df = pl.DataFrame({"value": arr})
 					elif arr.ndim == 2:
-						# Пробуем получить имена колонок из атрибутов
 						col_names = ds.attrs.get("column_names", [f"col_{i}" for i in range(arr.shape[1])])
 						df = pl.DataFrame(arr.tolist(), schema=col_names, orient="row")
 					else:
@@ -163,7 +226,6 @@ def _load_hdf5(p: Path) -> pl.DataFrame:
 
 
 def _load_arrow(p: Path) -> pl.DataFrame:
-	# Arrow IPC format: пробуем read_ipc, если ошибка - пробуем через pyarrow
 	try:
 		return _standardize(pl.read_ipc(p), "Arrow")
 	except pl.exceptions.ComputeError:
@@ -180,9 +242,20 @@ def _load_pickle(p: Path) -> pl.DataFrame:
 	with open(p, "rb") as f:
 		obj = pickle.load(f)
 
-	# Обработка numpy array
-	if hasattr(obj, 'shape'):  # Это numpy array
-		import numpy as np
+	# pandas DataFrame
+	if hasattr(obj, 'to_dict') and hasattr(obj, 'columns'):
+		try:
+			df = pl.DataFrame(obj)
+			return _standardize(df, "Pickle(Pandas)")
+		except Exception:
+			try:
+				df = pl.DataFrame(obj.to_dict())
+				return _standardize(df, "Pickle(Pandas)")
+			except Exception:
+				pass
+
+	# numpy array
+	if hasattr(obj, 'shape') and hasattr(obj, 'tolist'):
 		if obj.ndim == 1:
 			df = pl.DataFrame({"value": obj.tolist()})
 		elif obj.ndim == 2:
@@ -192,14 +265,25 @@ def _load_pickle(p: Path) -> pl.DataFrame:
 			df = pl.DataFrame({"value": obj.flatten().tolist()})
 		return _standardize(df, "Pickle(Numpy)")
 
-	# Остальные случаи
+	# список словарей
 	if isinstance(obj, list):
 		if obj and isinstance(obj[0], dict):
 			return _standardize(pl.DataFrame(obj), "Pickle")
 		return _standardize(pl.DataFrame({"text": [str(x) for x in obj]}), "Pickle")
+
+	# словарь
 	if isinstance(obj, dict):
 		return _standardize(pl.DataFrame([obj]), "Pickle")
-	raise ValueError("[Pickle] Must contain dict, list, tuple, or numpy array.")
+
+	# tuple
+	if isinstance(obj, tuple):
+		return _standardize(pl.DataFrame({"text": [str(x) for x in obj]}), "Pickle")
+
+	# объект с __dict__
+	if hasattr(obj, '__dict__'):
+		return _standardize(pl.DataFrame([obj.__dict__]), "Pickle")
+
+	raise ValueError("[Pickle] Cannot convert object to DataFrame.")
 
 
 def _load_hf_dataset(p: Path) -> pl.DataFrame:
@@ -211,8 +295,9 @@ def _load_hf_dataset(p: Path) -> pl.DataFrame:
 	return _standardize(pl.from_pandas(ds.to_pandas()), "HF Dataset")
 
 
+# ==================== 5. NUMPY ФОРМАТЫ ====================
+
 def _load_npy(p: Path) -> pl.DataFrame:
-	"""Поддержка .npy (NumPy binary format)"""
 	import numpy as np
 	data = np.load(p)
 	if data.ndim == 1:
@@ -226,10 +311,8 @@ def _load_npy(p: Path) -> pl.DataFrame:
 
 
 def _load_npz(p: Path) -> pl.DataFrame:
-	"""Поддержка .npz (NumPy compressed archive)"""
 	import numpy as np
 	data = np.load(p)
-	# Берём первый массив (обычно их несколько)
 	first_key = list(data.keys())[0]
 	arr = data[first_key]
 	if arr.ndim == 1:
@@ -242,8 +325,10 @@ def _load_npz(p: Path) -> pl.DataFrame:
 	return _standardize(df, f"NPZ({first_key})")
 
 
-# --- Карта расширений ---
+# ==================== КАРТА РАСШИРЕНИЙ (17+ ФОРМАТОВ) ====================
+
 ENGINE_MAP: Dict[str, Callable[[Path], pl.DataFrame]] = {
+	# Табличные (7)
 	".csv": _load_csv,
 	".tsv": _load_tsv,
 	".parquet": _load_parquet,
@@ -252,15 +337,22 @@ ENGINE_MAP: Dict[str, Callable[[Path], pl.DataFrame]] = {
 	".xls": _load_excel,
 	".jsonl": _load_jsonl,
 	".json": _load_json,
+	# Текстовые (4)
 	".txt": _load_txt,
 	".md": _load_md,
 	".xml": _load_xml,
+	# Графовые (3)
+	".gml": _load_gml,
+	".graphml": _load_graphml,
+	".dot": _load_dot,
+	# Специализированные (5)
 	".h5": _load_hdf5,
 	".hdf5": _load_hdf5,
 	".arrow": _load_arrow,
 	".pkl": _load_pickle,
 	".pickle": _load_pickle,
 	".hf": _load_hf_dataset,
+	# NumPy (2)
 	".npy": _load_npy,
 	".npz": _load_npz,
 }

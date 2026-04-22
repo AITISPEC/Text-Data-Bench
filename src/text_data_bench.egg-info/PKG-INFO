@@ -4,8 +4,8 @@ Version: 1.0.0
 Summary: Data-centric pipeline with 14 explicit format engines
 Requires-Python: >=3.12
 License-File: LICENSE
-Requires-Dist: polars>=1.39.3
-Requires-Dist: pydantic>=2.13.2
+Requires-Dist: polars>=1.40.0
+Requires-Dist: pydantic>=2.13.3
 Requires-Dist: typer>=0.24.1
 Requires-Dist: rich>=15.0.0
 Requires-Dist: datasketch>=1.10.0
@@ -16,8 +16,10 @@ Requires-Dist: h5py>=3.16.0
 Requires-Dist: datasets>=4.8.4
 Requires-Dist: xlsxwriter>=3.2.9
 Requires-Dist: pytest>=9.0.3
-Requires-Dist: numpy>=1.24.0
-Requires-Dist: pyarrow>=14.0.0
-Provides-Extra: cpu
+Requires-Dist: numpy>=2.4.0
+Requires-Dist: pyarrow>=18.0.0
+Requires-Dist: pydot>=3.9.0
+Requires-Dist: pyreadr>=0.5.1
 Provides-Extra: gpu
+Requires-Dist: polars[gpu]; extra == "gpu"
 Dynamic: license-file

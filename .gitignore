@@ -1,7 +1,8 @@
-```
 # Compiled Python files
 *.pyc
 __pycache__/
+*.pyo
+*.pyd
 
 # Virtual environments
 venv/
@@ -12,11 +13,22 @@ venv/
 
 # Logs
 *.log
+logs/
 
 # Coverage reports
 .coverage
+.coverage.*
 coverage/
 htmlcov/
+.coverage.xml
+
+# Output directory (keep .gitkeep)
+output/*
+!output/.gitkeep
+
+# Test fixtures (keep .gitkeep)
+tests/fixtures/*
+!tests/fixtures/.gitkeep
 
 # IDE files
 .vscode/
@@ -24,17 +36,54 @@ htmlcov/
 *.swp
 *.swo
 *.tmp
+*.sublime-*
+.project
+.pydevproject
 
 # Build artifacts
 dist/
 build/
 *.egg-info/
+*.egg
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
 
 # Testing
 .pytest_cache/
 .mypy_cache/
+.ruff_cache/
+.tox/
+hypothesis/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
 
 # OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
-```
+Desktop.ini
+
+# Package management
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Project specific
+*.parquet
+*.parquet.gzip
+output/*.md
+!output/.gitkeep
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.orig

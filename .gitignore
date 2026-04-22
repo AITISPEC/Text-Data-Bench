@@ -1,66 +1,51 @@
-# Compiled Python files
-*.pyc
+```
+# Python
 __pycache__/
+*.pyc
 *.pyo
 *.pyd
-
-# Virtual environments
+.Python
+env/
 venv/
 .venv/
+.ENV
 .env
+.env.*
 .env.local
-*.env.*
-
-# Logs
-*.log
-logs/
-
-# Coverage reports
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
 .coverage
 .coverage.*
-coverage/
-htmlcov/
-.coverage.xml
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.pytest_cache/
+.mypy_cache/
 
-# Output directory (keep .gitkeep)
-output/*
-!output/.gitkeep
-
-# Test fixtures (keep .gitkeep)
-tests/fixtures/*
-!tests/fixtures/.gitkeep
-
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-*.tmp
-*.sublime-*
-.project
-.pydevproject
-
-# Build artifacts
+# Distribution / packaging
+.Python
+.build/
+develop-eggs/
 dist/
-build/
-*.egg-info/
-*.egg
+downloads/
+eggs/
+.eggs/
 lib/
 lib64/
 parts/
 sdist/
 var/
 wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Testing
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.tox/
-hypothesis/
-
-# Jupyter Notebook
-.ipynb_checkpoints/
+# IDEs
+.vscode/
+.idea/
 
 # OS generated files
 .DS_Store
@@ -70,20 +55,4 @@ hypothesis/
 .Trashes
 ehthumbs.db
 Thumbs.db
-Desktop.ini
-
-# Package management
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Project specific
-*.parquet
-*.parquet.gzip
-output/*.md
-!output/.gitkeep
-
-# Temporary files
-*.tmp
-*.temp
-*.bak
-*.orig
+```

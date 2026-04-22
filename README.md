@@ -45,37 +45,21 @@ git clone https://github.com/AITISPEC/Text-Data-Bench.git
 cd Text-Data-Bench
 
 # Автоматическая установка (создаст .venv, установит Python 3.12 если нужно)
-.\force-install.ps1 -deps -create_env
+.\force-install.ps1 -create_env -verbose
 
-# С GPU поддержкой
-.\force-install.ps1 -deps -create_env -gpu
+# С GPU поддержкой (в разработке)
+.\force-install.ps1 -create_env -gpu -verbose
 ```
 
 ### Параметры установки
 
 Скрипт force-install.ps1 поддерживает следующие параметры:
 ```text
--deps Установка всех зависимостей из pyproject.toml
 -create_env Создание виртуального окружения .venv (автоустановка Python 3.12 при отсутствии)
--gpu  Включение GPU режима (NVIDIA index)
+-nodeps Установка только ядра проекта без зависимостей
 -verbose  Подробный вывод процесса установки
+-gpu  Включение GPU режима (NVIDIA index)
 -extra "args" Дополнительные аргументы для pip
-```
-
-### Примеры
-
-```powershell
-# Только ядро (без зависимостей)
-.\force-install.ps1
-
-# Полная установка
-.\force-install.ps1 -deps
-
-# Полная установка с GPU
-.\force-install.ps1 -deps -gpu
-
-# Полная установка с созданием окружения и подробным выводом
-.\force-install.ps1 -deps -create_env -verbose
 ```
 
 ### Что делает скрипт установки
@@ -85,8 +69,6 @@ cd Text-Data-Bench
 Создаёт виртуальное окружение .venv — изолированное окружение для проекта
 
 Проверяет сетевое подключение — к PyPI, Hugging Face, GitHub, NVIDIA
-
-Устанавливает проект в editable режиме — с зависимостями или без
 
 Проверяет GPU поддержку (опционально)
 ```

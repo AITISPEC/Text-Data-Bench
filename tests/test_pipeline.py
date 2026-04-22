@@ -8,25 +8,6 @@ import polars as pl
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
-
-def _should_skip(filename: str) -> str | None:
-	ext = Path(filename).suffix.lower()
-
-	# Пропускаем неподдерживаемые форматы
-	if ext in SKIP_FORMATS:
-		return SKIP_FORMATS[ext]
-
-	# Проверяем опциональные зависимости
-	for key, pkg in OPTIONAL_DEPS.items():
-		if ext == key:
-			try:
-				importlib.import_module(pkg)
-			except ImportError:
-				return f"{pkg} not installed"
-
-	return None
-
-
 TEST_FILES = [
 	f.name for f in FIXTURES_DIR.iterdir()
 	if (f.is_file() or f.is_dir()) and not f.name.startswith(('.', '__'))
@@ -35,10 +16,6 @@ TEST_FILES = [
 
 @pytest.mark.parametrize("filename", TEST_FILES)
 def test_pipeline_runs(filename, tmp_path):
-	skip_reason = _should_skip(filename)
-	if skip_reason:
-		pytest.skip(skip_reason)
-
 	sample = FIXTURES_DIR / filename
 	cfg = load_config()
 	cfg.filters.min_length = 3

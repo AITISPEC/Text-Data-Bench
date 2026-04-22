@@ -1,11 +1,44 @@
 ﻿param(
-    [switch]$deps,
     [switch]$verbose,
     [switch]$gpu,
     [switch]$create_env,
+    [switch]$nodeps,
     [string]$env_name = ".venv",
     [string]$extra = ""
 )
+
+# ==================== ПРОВЕРКА НЕИЗВЕСТНЫХ ФЛАГОВ ====================
+$validSwitches = @('verbose', 'gpu', 'create_env', 'nodeps')
+$validParams = @('env_name', 'extra')
+
+# Получаем все переданные аргументы
+$allArgs = $MyInvocation.Line -split ' ' | Where-Object { $_ -match '^-' }
+
+$unknownFlags = @()
+foreach ($arg in $allArgs) {
+    # Убираем дефисы в начале
+    $flagName = $arg -replace '^-+', ''
+
+    # Проверяем, есть ли такой switch или параметр
+    $isValidSwitch = $flagName -in $validSwitches
+    $isValidParam = ($flagName -split '=')[0] -in $validParams
+
+    if (-not ($isValidSwitch -or $isValidParam)) {
+        $unknownFlags += $flagName
+    }
+}
+
+if ($unknownFlags.Count -gt 0) {
+    Write-Host "❌ ОШИБКА: Обнаружены неизвестные флаги: $($unknownFlags -join ', ')" -ForegroundColor Red
+    Write-Host "`n=== Доступные параметры ===" -ForegroundColor Cyan
+    Write-Host "  -verbose      : Показывать подробный вывод" -ForegroundColor Green
+    Write-Host "  -gpu          : Установка с поддержкой CUDA" -ForegroundColor Green
+    Write-Host "  -create_env   : Создать виртуальное окружение" -ForegroundColor Green
+    Write-Host "  -nodeps       : Не устанавливать зависимости" -ForegroundColor Green
+    Write-Host "  -env_name     : Имя окружения (по умолчанию: .venv)" -ForegroundColor Green
+    Write-Host "  -extra        : Доп. аргументы для pip" -ForegroundColor Green
+    exit 1
+}
 
 Write-Host "=== Force Install Tool ===" -ForegroundColor Magenta
 
@@ -22,6 +55,26 @@ function Test-Python312 {
         return $false
     }
     return $false
+}
+
+function Test-VenvExists {
+    param([string]$Path)
+    return (Test-Path "$Path\Scripts\python.exe") -or (Test-Path "$Path/bin/python")
+}
+
+function Show-Usage {
+    Write-Host "`n=== Правильное использование ===" -ForegroundColor Cyan
+    Write-Host "  .\force-install.ps1 -create_env" -ForegroundColor Green
+    Write-Host "  .\force-install.ps1 -create_env -gpu" -ForegroundColor Green
+    Write-Host "  .\force-install.ps1 -create_env -verbose" -ForegroundColor Green
+    Write-Host "  .\force-install.ps1 -create_env -nodeps" -ForegroundColor Green
+    Write-Host "`n  Параметры:" -ForegroundColor Yellow
+    Write-Host "    -create_env  : Создать виртуальное окружение (ОБЯЗАТЕЛЬНО при первом запуске)" -ForegroundColor Gray
+    Write-Host "    -gpu         : Установить GPU-версию с поддержкой CUDA" -ForegroundColor Gray
+    Write-Host "    -verbose     : Показывать подробный вывод установки" -ForegroundColor Gray
+    Write-Host "    -nodeps      : НЕ устанавливать зависимости (только сам проект)" -ForegroundColor Gray
+    Write-Host "    -env_name    : Имя виртуального окружения (по умолчанию: .venv)" -ForegroundColor Gray
+    Write-Host "    -extra       : Дополнительные аргументы для pip" -ForegroundColor Gray
 }
 
 function Install-PythonWindows {
@@ -103,10 +156,8 @@ if (-not $hasPython312) {
             exit 1
         }
     } else {
-        Write-Host "  Please install Python 3.12+ or use -create_env flag" -ForegroundColor Yellow
-        Write-Host "  Example: .\force-install.ps1 -deps -create_env" -ForegroundColor Gray
-        Write-Host ""
-        Write-Host "  Download Python: https://www.python.org/downloads/" -ForegroundColor Cyan
+        Write-Host "  ❌ Python 3.12+ is required but not found!" -ForegroundColor Red
+        Show-Usage
         exit 1
     }
 }
@@ -115,36 +166,53 @@ Write-Host "  ✅ Python 3.12+ available" -ForegroundColor Green
 $pythonVersion = & python --version 2>&1
 Write-Host "  $pythonVersion" -ForegroundColor Gray
 
-# ==================== ПУНКТ 2/6: СОЗДАНИЕ VENV ====================
-Write-Host "[2/6] Setting up venv environment..." -ForegroundColor Cyan
+# ==================== ПУНКТ 2/6: ПРОВЕРКА И СОЗДАНИЕ VENV ====================
+Write-Host "[2/6] Checking virtual environment..." -ForegroundColor Cyan
 
 $venvPath = ".\$env_name"
+$venvExists = Test-VenvExists -Path $venvPath
 
-if ($create_env) {
-    Write-Host "  Creating venv environment '$env_name'..." -ForegroundColor Gray
+if (-not $venvExists) {
+    Write-Host "  ⚠️ Virtual environment '$env_name' not found!" -ForegroundColor Yellow
 
-    if (Test-Path $venvPath) {
-        Write-Host "  Environment '$env_name' already exists, removing..." -ForegroundColor Gray
-        Remove-Item -Recurse -Force $venvPath
-    }
+    if ($create_env) {
+        Write-Host "  Creating venv environment '$env_name'..." -ForegroundColor Gray
 
-    & python -m venv $env_name
+        & python -m venv $env_name
 
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "  ❌ Failed to create venv" -ForegroundColor Red
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "  ❌ Failed to create venv" -ForegroundColor Red
+            exit 1
+        }
+
+        Write-Host "  ✅ venv created: $venvPath" -ForegroundColor Green
+        $venvExists = $true
+    } else {
+        Write-Host "  ❌ Virtual environment required but not found!" -ForegroundColor Red
+        Show-Usage
         exit 1
     }
-
-    Write-Host "  ✅ venv created: $venvPath" -ForegroundColor Green
-
-    $activateScript = "$venvPath\Scripts\Activate.ps1"
-    if (Test-Path $activateScript) {
-        & $activateScript
-        $env:PATH = "$venvPath\Scripts;$env:PATH"
-        Write-Host "  ✅ Environment activated" -ForegroundColor Green
-    }
 } else {
-    Write-Host "  Using existing Python environment" -ForegroundColor Gray
+    Write-Host "  ✅ Virtual environment found: $venvPath" -ForegroundColor Green
+}
+
+# Активируем окружение
+$activateScript = "$venvPath\Scripts\Activate.ps1"
+if (-not (Test-Path $activateScript)) {
+    $activateScript = "$venvPath/bin/activate"  # Linux/Mac
+}
+
+if (Test-Path $activateScript) {
+    if ($activateScript -like "*.ps1") {
+        & $activateScript
+    } else {
+        # Для Linux/Mac source не работает в PowerShell, используем прямой путь к python
+        $env:PATH = "$venvPath\Scripts;$venvPath\bin;$env:PATH"
+    }
+    Write-Host "  ✅ Environment activated" -ForegroundColor Green
+} else {
+    Write-Host "  ⚠️ Could not find activation script, using direct path" -ForegroundColor Yellow
+    $env:PATH = "$venvPath\Scripts;$venvPath\bin;$env:PATH"
 }
 
 # ==================== ПУНКТ 3/6: ПРОВЕРКА ПОДКЛЮЧЕНИЯ ====================
@@ -256,14 +324,15 @@ if ($gpu) {
     Write-Host "  GPU mode active: Added NVIDIA index" -ForegroundColor Magenta
 }
 
-# 2. Логика установки зависимостей
-if (-not $deps) {
+# 2. Логика установки зависимостей (с зависимостями по умолчанию)
+if ($nodeps) {
+    # Без зависимостей
     $pipArgs += "-e", $installTarget, "--no-deps"
     Write-Host "  Mode: WITHOUT dependencies (editable)" -ForegroundColor Yellow
-}
-else {
+} else {
+    # С зависимостями (по умолчанию)
     $pipArgs += "-e", $installTarget
-    Write-Host "  Mode: WITH dependencies (editable)" -ForegroundColor Green
+    Write-Host "  Mode: WITH dependencies (editable) [DEFAULT]" -ForegroundColor Green
 }
 
 # 3. Добавляем $extra аргументы, если они есть
@@ -300,11 +369,10 @@ $imp = python -c "import text_data_bench; print(' OK: module loaded')" 2>&1
 if ($LASTEXITCODE -eq 0) {
     Write-Host $imp -ForegroundColor Green
     Write-Host "`n=== Installation Successful ===" -ForegroundColor Green
-    if ($create_env) {
-        Write-Host "  Environment: $venvPath" -ForegroundColor Cyan
-        Write-Host "  To activate manually: .\$env_name\Scripts\Activate.ps1" -ForegroundColor Gray
-    }
-    if ($deps -and $verbose) {
+    Write-Host "  Environment: $venvPath" -ForegroundColor Cyan
+    Write-Host "  To activate manually: .\$env_name\Scripts\Activate.ps1" -ForegroundColor Gray
+
+    if ($verbose) {
         pip list | Select-String -Pattern "datasets|pandas|numpy|pyarrow|h5py|openpyxl|networkx|pydot"
     }
 } else {

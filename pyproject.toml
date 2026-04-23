@@ -1,7 +1,7 @@
 [project]
 name = "text-data-bench"
 version = "1.0.0"
-description = "Data-centric pipeline with 14 explicit format engines"
+description = "Data-centric pipeline with 17 explicit format engines"
 requires-python = ">=3.12"
 dependencies = [
     "polars>=1.40.0",
@@ -9,7 +9,6 @@ dependencies = [
     "typer>=0.24.1",
     "rich>=15.0.0",
     "datasketch>=1.10.0",
-    "plotly>=6.7.0",
     "pyyaml>=6.0.3",
     "openpyxl>=3.1.5",
     "h5py>=3.16.0",
@@ -18,8 +17,7 @@ dependencies = [
     "pytest>=9.0.3",
     "numpy>=2.4.0",
     "pyarrow>=18.0.0",
-    "pydot>=3.9.0",
-    "pyreadr>=0.5.1"
+    "networkx>=3.0"
 ]
 
 [project.optional-dependencies]

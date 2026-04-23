@@ -16,7 +16,6 @@ src/text_data_bench/config/loader.py
 src/text_data_bench/core/__init__.py
 src/text_data_bench/core/device.py
 src/text_data_bench/core/pipeline.py
-src/text_data_bench/core/registry.py
 src/text_data_bench/engines/__init__.py
 src/text_data_bench/engines/base.py
 src/text_data_bench/engines/core.py
@@ -26,7 +25,6 @@ src/text_data_bench/engines/specialized.py
 src/text_data_bench/engines/tabular.py
 src/text_data_bench/engines/textual.py
 src/text_data_bench/io/__init__.py
-src/text_data_bench/io/loaders.py
 src/text_data_bench/io/reporters.py
 src/text_data_bench/processors/__init__.py
 src/text_data_bench/processors/balancer.py
@@ -37,6 +35,5 @@ src/text_data_bench/tests/__init__.py
 src/text_data_bench/utils/__init__.py
 src/text_data_bench/utils/cache.py
 src/text_data_bench/utils/logger.py
-src/text_data_bench/utils/magic_detector.py
 tests/test_pipeline.py
 tests/test_units.py

@@ -13,21 +13,20 @@ from text_data_bench.utils.logger import setup_logger
 import polars as pl
 
 console = Console()
-logger = setup_logger()
+
 
 def run(input_path: str, output_path: str, cfg: PipelineConfig) -> dict:
-	stats = {"steps_completed": 0, "input": input_path, "output": output_path}
-	
-	# Инициализация логгера согласно конфигу
+	# Настройка логгера согласно конфигу
 	log_level = cfg.logging.level if hasattr(cfg, 'logging') else "INFO"
 	json_fmt = cfg.logging.json_format if hasattr(cfg, 'logging') else False
-	global logger
 	logger = setup_logger(level=log_level, json_format=json_fmt)
-	
+
+	stats = {"steps_completed": 0, "input": input_path, "output": output_path}
+
 	try:
 		logger.info(f"Starting pipeline for {input_path}")
 		console.print("[bold cyan]🚀 Starting pipeline...[/bold cyan]")
-		
+
 		if cfg.pipeline.prefer_gpu:
 			from text_data_bench.core.device import detect_gpu
 			if detect_gpu():
@@ -36,7 +35,7 @@ def run(input_path: str, output_path: str, cfg: PipelineConfig) -> dict:
 			else:
 				logger.warning("GPU requested but not available, using CPU")
 				console.print("[yellow]⚠ GPU requested but not available, using CPU[/yellow]")
-		
+
 		with Progress(
 			SpinnerColumn(),
 			TextColumn("[progress.description]{task.description}"),
@@ -45,7 +44,7 @@ def run(input_path: str, output_path: str, cfg: PipelineConfig) -> dict:
 			TimeRemainingColumn(),
 			console=console
 		) as progress:
-			
+
 			# Step 1: Loading
 			load_task = progress.add_task("[cyan]Loading & Standardizing...", total=100)
 			logger.info("Step 1: Loading & Standardizing")
@@ -58,7 +57,7 @@ def run(input_path: str, output_path: str, cfg: PipelineConfig) -> dict:
 			console.print(f"[blue]📝 Processing column: '{TARGET_COL}'[/blue]")
 
 			before = compute_metrics(df, TARGET_COL)
-			
+
 			# Step 2: Filtering
 			filter_task = progress.add_task("[cyan]Filtering...", total=100)
 			logger.info("Step 2: Filtering")
@@ -84,7 +83,7 @@ def run(input_path: str, output_path: str, cfg: PipelineConfig) -> dict:
 			progress.update(balance_task, completed=100)
 
 			after = compute_metrics(df, TARGET_COL)
-			
+
 			# Step 5: Saving
 			save_task = progress.add_task("[cyan]Saving & Reporting...", total=100)
 			logger.info("Step 5: Saving & Reporting")
@@ -95,19 +94,18 @@ def run(input_path: str, output_path: str, cfg: PipelineConfig) -> dict:
 			if out_ext == ".parquet":
 				df.write_parquet(output_path)
 			elif out_ext in (".csv", ".tsv"):
-				# CSV/TSV не поддерживают вложенные типы → безопасный каст всех колонок в строки
 				sep = "\t" if out_ext == ".tsv" else ","
 				df.select(pl.all().cast(pl.String)).write_csv(output_path, separator=sep)
 			else:
-				# Для .pkl, .json, .md и прочих расширений сохраняем в parquet как стандарт
 				fallback = Path(output_path).with_suffix(".parquet")
 				df.write_parquet(fallback)
 				logger.warning(f"Saved as {fallback.name} (safe format)")
 				console.print(f"[yellow]⚠ Saved as {fallback.name} (safe format)[/yellow]")
 
 			generate_report(before, after, stats, cfg.output.report_path)
+			stats["steps_completed"] += 1  # шаг сохранения
 			progress.update(save_task, completed=100)
-		
+
 		logger.info("Pipeline finished successfully")
 		console.print("[bold green]✅ Pipeline finished successfully.[/bold green]")
 		return {"success": True, "input": input_path, "output": output_path}

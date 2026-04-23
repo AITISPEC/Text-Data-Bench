@@ -11,13 +11,20 @@ from text_data_bench.core.pipeline import run
 console = Console()
 app = typer.Typer(help="Automated data-centric benchmark & cleaning pipeline", add_completion=False)
 
-# Оставляем для справки, но не используем для фильтрации списка
-SUPPORTED_EXT = {".csv", ".tsv", ".parquet", ".feather", ".xlsx", ".xls", ".jsonl", ".json", ".txt", ".md", ".xml", ".h5", ".hdf5", ".arrow", ".pkl", ".pickle"}
+# Все поддерживаемые расширения (синхронизировано с ENGINE_MAP)
+SUPPORTED_EXT = {
+	".csv", ".tsv", ".parquet", ".feather", ".xlsx", ".xls",
+	".jsonl", ".json", ".txt", ".md", ".xml", ".h5", ".hdf5",
+	".arrow", ".pkl", ".pickle", ".hf", ".npy", ".npz",
+	".gml", ".graphml", ".dot"
+}
+
 
 def print_header():
 	console.print("[bold cyan]┌──────────────────────────────────────────────────────┐[/bold cyan]")
 	console.print("[bold cyan]│           TextDataBench CLI v1.1.0                 │[/bold cyan]")
 	console.print("[bold cyan]└──────────────────────────────────────────────────────┘[/bold cyan]")
+
 
 @app.command(name="menu")
 def menu():
@@ -43,7 +50,6 @@ def menu():
 				console.print(f"\n[{'green' if res.returncode == 0 else 'red'}]Tests completed with code {res.returncode}[/{'green' if res.returncode == 0 else 'red'}]")
 
 			elif choice == "2":
-				SUPPORTED_EXT.add(".hf")
 				files = sorted([f for f in fixture_dir.iterdir()
 								if (f.is_file() or f.is_dir()) and not f.name.startswith(('.', '__'))
 								and f.suffix.lower() in SUPPORTED_EXT])
@@ -86,6 +92,7 @@ def menu():
 			sys.exit(0)
 		except Exception as e:
 			console.print(f"\n[red]💥 CLI Error: {e}[/red]")
+
 
 if __name__ == "__main__":
 	app()

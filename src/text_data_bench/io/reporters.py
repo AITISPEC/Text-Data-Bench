@@ -4,6 +4,7 @@ from rich.console import Console
 
 console = Console()
 
+
 def _fmt(val) -> str:
 	if val is None:
 		return "N/A"
@@ -17,6 +18,7 @@ def _fmt(val) -> str:
 		return f"{val:,}"
 	return str(val)
 
+
 def _fmt_delta(before, after) -> str:
 	if before is None or after is None:
 		return "—"
@@ -28,6 +30,7 @@ def _fmt_delta(before, after) -> str:
 	sign = "↑" if diff > 0 else "↓" if diff < 0 else "•"
 	val = f"{abs(diff):.2f}" if isinstance(before, float) else f"{int(abs(diff)):,}"
 	return f"{sign} {val}"
+
 
 def generate_report(before: dict, after: dict, stats: dict, out_path: str):
 	p = Path(out_path)

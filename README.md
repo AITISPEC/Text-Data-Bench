@@ -10,7 +10,7 @@
 - **Интерактивное CLI**: Удобное меню с поддержкой пакетной обработки (`[0] ALL`)
 - **Наглядные отчёты**: Индивидуальные Markdown-файлы для каждого датасета с дельтой метрик «До/После»
 - **Безопасный I/O**: Автоматический фоллбэк в `.parquet` при сохранении форматов, не поддерживающих вложенность
-- **GPU-детекция**: Автоматическое определение NVIDIA GPU / Apple MPS при включённой опции `prefer_gpu`
+- **GPU-детекция**: Автоматическое определение NVIDIA GPU при включённой опции `prefer_gpu`
 
 ## 📦 Поддерживаемые форматы
 
@@ -37,40 +37,32 @@
 
 ## 🚀 Установка
 
-### Быстрый старт (Windows)
+### Windows (рекомендуется)
 
 ```powershell
-# Клонируем репозиторий
 git clone https://github.com/AITISPEC/Text-Data-Bench.git
 cd Text-Data-Bench
-
-# Автоматическая установка (создаст .venv, установит Python 3.12 если нужно)
 .\force-install.ps1 -create_env -verbose
-
-# С GPU поддержкой (в разработке)
-.\force-install.ps1 -create_env -gpu -verbose
 ```
 
-### Параметры установки
+### Параметры force-install.ps1:
 
-Скрипт force-install.ps1 поддерживает следующие параметры:
 ```text
--create_env Создание виртуального окружения .venv (автоустановка Python 3.12 при отсутствии)
--nodeps Установка только ядра проекта без зависимостей
--verbose  Подробный вывод процесса установки
--gpu  Включение GPU режима (NVIDIA index)
--extra "args" Дополнительные аргументы для pip
+-create_env – создать виртуальное окружение
+
+-gpu – установка с поддержкой CUDA
+
+-verbose – подробный вывод
+
+-nodeps – не устанавливать зависимости
 ```
 
-### Что делает скрипт установки
-```text
-Проверяет наличие Python 3.12+ — если нет, автоматически скачивает и устанавливает (Windows)
+### Linux / macOS
 
-Создаёт виртуальное окружение .venv — изолированное окружение для проекта
-
-Проверяет сетевое подключение — к PyPI, Hugging Face, GitHub, NVIDIA
-
-Проверяет GPU поддержку (опционально)
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
 ```
 
 ## 📖 Использование
@@ -101,43 +93,44 @@ python -m text_data_bench
 
 ## ⚙️ Конфигурация
 
-Параметры пайплайна управляются через `configs/pipeline.yaml`:
+Пример configs/pipeline.yaml:
 ```yaml
-filters:
-  min_length: 10      # Минимальная длина текста
-  max_length: 10000   # Максимальная длина
-  remove_empty: true  # Удалять пустые строки
-dedup:
-  exact: true         # Точная дедупликация
-  fuzzy: true         # Нечёткая дедупликация (MinHash)
-  fuzzy_threshold: 0.85 # Порог нечёткого дублирования
-  num_perm: 128       # Количество перестановок для MinHash
-balance:
-  strategy: "stratified" # Стратифицированная балансировка
-  group_col: null     # Колонка для группировки (если нужна)
-  seed: 42            # Seed для воспроизводимости
 pipeline:
-  name: "default"
-  prefer_gpu: false   # Детекция GPU при старте
+  prefer_gpu: false
+filters:
+  min_length: 10
+  max_length: 10000
+  remove_empty: true
+dedup:
+  exact: true
+  fuzzy: true
+  fuzzy_threshold: 0.85
+  num_perm: 128
+balance:
+  strategy: "stratified"
+  group_col: null
+  seed: 42
 output:
-  report_path: "./output/reports"
+  format: "parquet"
+  report_path: "output/report.md"
+logging:
+  level: "INFO"
+  json_format: false
 ```
 
 ## 🏗️ Структура проекта
 
 ```text
 text-data-bench/
-├── configs/              # pipeline.yaml, parsers.yaml
-├── output/               # Результаты обработки и отчёты
+├── configs/              # pipeline.yaml
+├── output/               # Результаты обработки
 ├── src/text_data_bench/
-│   ├── engines/          # Движки загрузки + стандартизатор (17 форматов)
-│   ├── core/             # Оркестратор пайплайна, детектор GPU, реестр
-│   ├── processors/       # Фильтры, дедуп, балансировка, метрики
-│   ├── io/               # auto_load(), генераторы отчётов, загрузчик конфигов
-│   ├── utils/            # logger, magic_detector
-│   └── cli.py            # Интерактивное меню
-├── tests/
-│   ├── fixtures/         # Папка для сырых датасетов
-│   └── generate_fixtures.py # Генератор тестовых данных
-└── force-install.ps1     # Скрипт установки и управления зависимостями
+│   ├── engines/          # 17 движков загрузки
+│   ├── core/             # Пайплайн, GPU-детекция
+│   ├── processors/       # Фильтры, дедуп, балансировка
+│   ├── io/               # Генерация отчётов
+│   ├── utils/            # Логгер, кэш
+│   └── cli.py
+├── tests/                # Тесты и фикстуры
+└── force-install.ps1     # Только для Windows
 ```

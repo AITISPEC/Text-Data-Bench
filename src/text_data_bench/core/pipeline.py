@@ -58,11 +58,14 @@ def run(input_path: str, output_path: str, cfg: PipelineConfig) -> dict:
 
 			before = compute_metrics(df, TARGET_COL)
 
-			# Step 2: Filtering
+			# Step 2: Filtering (адаптивный режим, игнорируем cfg.filters.min_length/max_length)
 			filter_task = progress.add_task("[cyan]Filtering...", total=100)
-			logger.info("Step 2: Filtering")
-			console.print("[2/5] Filtering...")
-			df = apply_filters(df, TARGET_COL, cfg.filters.min_length, cfg.filters.max_length, cfg.filters.remove_empty)
+			logger.info("Step 2: Filtering (adaptive mode, tolerance=0.3)")
+			console.print("[2/5] Filtering (adaptive, ±30% from mode)...")
+			df = apply_filters(df, TARGET_COL,
+							   min_len=None, max_len=None,
+							   remove_empty=cfg.filters.remove_empty,
+							   adaptive_tolerance=0.3)
 			stats["steps_completed"] += 1
 			progress.update(filter_task, completed=100)
 

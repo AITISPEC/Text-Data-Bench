@@ -42,7 +42,7 @@
 ```powershell
 git clone https://github.com/AITISPEC/Text-Data-Bench.git
 cd Text-Data-Bench
-.\force-install.ps1 -create_env -verbose
+.\install.ps1 -create_env -verbose
 ```
 
 ### Параметры force-install.ps1:
@@ -70,7 +70,7 @@ pip install -e .
 Активация окружения
 ```powershell
 # Windows
-.\.venv\Scripts\Activate.ps1
+.venv\Scripts\Activate.ps1
 
 # Linux/Mac
 source .venv/bin/activate

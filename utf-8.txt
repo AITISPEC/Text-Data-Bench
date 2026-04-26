@@ -1,9 +1,0 @@
-@'
-... вставьте сюда весь код force-reinstall.ps1 ...
-'@ | Set-Content -Path .\force-install.ps1 -Encoding UTF8 -Force
-
-# Output and Input
-output/*
-!output/.gitkeep
-tests/fixtures/*
-!tests/fixtures/.gitkeep

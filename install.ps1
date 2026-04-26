@@ -64,10 +64,10 @@ function Test-VenvExists {
 
 function Show-Usage {
     Write-Host "`n=== Правильное использование ===" -ForegroundColor Cyan
-    Write-Host "  .\force-install.ps1 -create_env" -ForegroundColor Green
-    Write-Host "  .\force-install.ps1 -create_env -gpu" -ForegroundColor Green
-    Write-Host "  .\force-install.ps1 -create_env -verbose" -ForegroundColor Green
-    Write-Host "  .\force-install.ps1 -create_env -nodeps" -ForegroundColor Green
+    Write-Host "  .\install.ps1 -create_env" -ForegroundColor Green
+    Write-Host "  .\install.ps1 -create_env -gpu" -ForegroundColor Green
+    Write-Host "  .\install.ps1 -create_env -verbose" -ForegroundColor Green
+    Write-Host "  .\install.ps1 -create_env -nodeps" -ForegroundColor Green
     Write-Host "`n  Параметры:" -ForegroundColor Yellow
     Write-Host "    -create_env  : Создать виртуальное окружение (ОБЯЗАТЕЛЬНО при первом запуске)" -ForegroundColor Gray
     Write-Host "    -gpu         : Установить GPU-версию с поддержкой CUDA" -ForegroundColor Gray
